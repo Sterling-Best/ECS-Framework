@@ -7,6 +7,10 @@
 
 namespace ECSID {
 
+	void Initialize() {
+
+	}
+
 
 	std::type_index GetEntityIdType() {
 		return _entityIdType;
@@ -17,12 +21,10 @@ namespace ECSID {
 	}
 
 	namespace {
-
 		std::type_index _entityIdType;
 		std::type_index _componentIdType;
 	}
 
-	// TODO: Create a ECIDConfigManager
 
 };
 
