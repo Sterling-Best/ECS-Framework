@@ -2,41 +2,28 @@
 
 #include "IdConfig.h"
 
+#ifndef ECSID_H
+#define ECSID_H
+
 namespace ECSID {
 
 
-};
-
-class ECSIDA {
-
-public:
-
-	ECSID(const ECSID&) = delete;
-	ECSID& operator=(const ECSID&) = delete;
-
-	// Public method to access the singleton instance
-	static ECSID& GetInstance() {
-		static ECSID instance; // Guaranteed to be destroyed, instantiated on first use
-		return instance;
-	}
-
 	std::type_index GetEntityIdType() {
-		return this->_entityIdType;
+		return _entityIdType;
 	}
 
 	std::type_index GetComponentIdType() {
-		return this->_componentIdType;
+		return _componentIdType;
 	}
 
-private:
+	namespace {
 
-	ECSID()
-		: _useUniversalId(true),
-		_entityIdType(uint32_t),
-		_componentIdType(uint64_t) {}
+		std::type_index _entityIdType;
+		std::type_index _componentIdType;
+	}
 
-	bool _useUniversalId;
+	// TODO: Create a ECIDConfigManager
 
-	std::type_index _entityIdType;
-	std::type_index _componentIdType;
 };
+
+#endif //ECSID_H
