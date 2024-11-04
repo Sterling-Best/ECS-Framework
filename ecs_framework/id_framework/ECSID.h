@@ -12,7 +12,6 @@ namespace ECSID {
 	void Initialize() {
 		if (_ecsIdRegistery == NULL) {
 			_ecsIdRegistry = ECSIdRegistery(IdConfig)
-
 		}
 		// TODO: Add error if the _ecsIdRegistery has been initialized
 	}
