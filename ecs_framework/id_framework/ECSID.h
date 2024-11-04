@@ -8,10 +8,13 @@
 
 namespace ECSID {
 
-	template<typename IdConfig>
+	template<typename idConfig>
 	void Initialize() {
-		if (_ecsIdRegistery == NULL) {
-			_ecsIdRegistry = ECSIdRegistery(IdConfig)
+		if (!_ecsIdRegistery) {
+				_ecsIdRegistery = ECSIdRegistery();
+				_ecsIdRegistery.SetIdConfig<idConfig>();
+				_entityIdType = _ecsIdRegistery.GetCurrentIdConfig()->GetEntityIdType();
+				_componentIdType = _ecsIdRegistery.GetCurrentIdConfig()->GetComponentIdType();
 		}
 		// TODO: Add error if the _ecsIdRegistery has been initialized
 	}
@@ -23,9 +26,11 @@ namespace ECSID {
 		return _componentIdType;
 	}
 
+	// TODO: Return what the next ID is suppose to be
+
 	namespace {
 
-		ECSIdRegistery _ecsIdRegistry;
+		ECSIdRegistery _ecsIdRegistery;
 
 		std::type_index _entityIdType;
 		std::type_index _componentIdType;

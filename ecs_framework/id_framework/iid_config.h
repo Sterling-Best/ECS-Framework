@@ -8,7 +8,7 @@ public:
         return this->_componentIdType;
     }
 
-    std::type_index GetCEntityIDType() const {
+    std::type_index GetEntityIdType() const {
         return this->_entityIdType;
     }
 
