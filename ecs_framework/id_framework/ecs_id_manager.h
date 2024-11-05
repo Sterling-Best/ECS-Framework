@@ -17,6 +17,19 @@ public:
 		_iIdConfig = _ecsIdRegistery.GetCurrentIdConfig();
 		_entityIdType = _iIdConfig.GetEntityIdType();
 		_componentIdType = _iIdConfig.GetComponentIdType();
+		if (!IdConfigTest) {
+			//Report Error
+		}
+	}
+
+	bool IdConfigTest() {
+		auto entityValue = NextEntityId();
+		auto componentValue = NextComponentId();
+		if (GetEntityIdType() == std::type_index actualType(typeid(entityValue))
+			&& GetComponentIdType() == std::type_index actualType(typeid(componentValue)) {
+			return true;
+		}
+		return false;
 	}
 
 	/* TODO: Test check to make sure that the output of

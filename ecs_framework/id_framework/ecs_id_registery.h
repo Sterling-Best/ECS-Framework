@@ -19,12 +19,14 @@ public:
     void SetIdConfig() {
         auto it = _idConfigPool.find(typeid(selectedIdConfig));
         if (it != _idConfigPool.end()) {
-            _currentIdConfig = it->second->Clone(); // Shared ownership, no copy made 
+            _currentIdConfig = it->second->Clone();
         } 
         else {
             // Handle the case where the config is not found
         }
     }
+
+    // TODO: Add a method that collects all classes in internal and external modles folders and place it in the _idConfigPool at CompileTime
 
 private:
     std::shared_ptr<IIdConfig> _currentIdConfig;
