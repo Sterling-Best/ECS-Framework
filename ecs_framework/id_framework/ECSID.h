@@ -1,7 +1,7 @@
 #include <typeindex>
 
 #include "ecs_id_registery.h"
-#include "IdConfig.h"
+#include "ecs_id_manager.h"
 
 #ifndef ECSID_H
 #define ECSID_H
@@ -10,30 +10,20 @@ namespace ECSID {
 
 	template<typename idConfig>
 	void Initialize() {
-		if (!_ecsIdRegistery) {
-				_ecsIdRegistery = ECSIdRegistery();
-				_ecsIdRegistery.SetIdConfig<idConfig>();
-				_entityIdType = _ecsIdRegistery.GetCurrentIdConfig()->GetEntityIdType();
-				_componentIdType = _ecsIdRegistery.GetCurrentIdConfig()->GetComponentIdType();
-		}
-		// TODO: Add error if the _ecsIdRegistery has been initialized
+		_ecsIdManager = ECSIdMaanger();
+		_ecsIdManager.Initialize<idConfig>();
 	}
+
 	std::type_index GetEntityIdType() {
-		return _entityIdType;
+		return _ecsIdManager;
 	}
 
 	std::type_index GetComponentIdType() {
 		return _componentIdType;
 	}
 
-	// TODO: Return what the next ID is suppose to be
-
 	namespace {
-
-		ECSIdRegistery _ecsIdRegistery;
-
-		std::type_index _entityIdType;
-		std::type_index _componentIdType;
+		ECSIdMaanger _ecsIdManger;
 	}
 
 };

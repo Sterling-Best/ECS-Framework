@@ -12,9 +12,9 @@ public:
         return this->_entityIdType;
     }
 
-    // Pure virtual function making this an abstract class
-    virtual void SetSequanceStartValue() const = 0;
-    virtual void NetxIdInSequence() const = 0;
+    virtual _entityIdType NextEntityId() const = 0;
+    virtual _componentIdType NextComponentId() const = 0;
+
 
 protected:
     std::type_index _componentIdType;
