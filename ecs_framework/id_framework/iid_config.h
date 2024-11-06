@@ -12,8 +12,11 @@ public:
         return this->_entityIdType;
     }
 
-    virtual _entityIdType NextEntityId() const = 0;
-    virtual _componentIdType NextComponentId() const = 0;
+    /*The following Functions output a Type that is declare in the _entityIdType and _componentIdTYpe variables.
+        we will not know what those are until a child class that defines them is created*/
+
+    virtual auto NextEntityId() const = 0;
+    virtual auto NextComponentId() const = 0;
 
 
 protected:

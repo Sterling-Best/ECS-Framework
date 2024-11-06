@@ -7,7 +7,7 @@ class ECSIdMaanger {
 
 public: 
 
-	ECSIdMaanger() {
+	ECSIdManger() {
 		_ecsIdRegistery = ECSIdRegistery();
 	}
 
@@ -23,10 +23,10 @@ public:
 	}
 
 	bool IdConfigTest() {
-		auto entityValue = NextEntityId();
-		auto componentValue = NextComponentId();
-		if (GetEntityIdType() == std::type_index actualType(typeid(entityValue))
-			&& GetComponentIdType() == std::type_index actualType(typeid(componentValue)) {
+		std::type_index entityValue = std::type_index actualType(NextEntityId());
+		std::type_index componentValue = std::type_index actualType(typeid(NextComponentId());
+		if (GetEntityIdType() == entityValue
+			&& GetComponentIdType() == componentValue) {
 			return true;
 		}
 		return false;

@@ -5,9 +5,16 @@
 
 class ECSIdRegistery {
 
-public:
+    static ECSIdRegistry& Instance() {
+        static ECSIdRegistry instance;
+        return instance;
+    }
 
-    // TODO: COvert to SIngleton
+    // Delete copy constructor and assignment operator to enforce singleton property
+    ECSIdRegistry(const ECSIdRegistry&) = delete;
+    ECSIdRegistry& operator=(const ECSIdRegistry&) = delete;
+
+public:
 
     // TODO: Add teh ability to receive and add IdConfigs from the Modules folders
 
@@ -22,13 +29,16 @@ public:
             _currentIdConfig = it->second->Clone();
         } 
         else {
-            // Handle the case where the config is not found
+            throw std::runtime_error("IdConfig not found in the pool");
         }
     }
 
     // TODO: Add a method that collects all classes in internal and external modles folders and place it in the _idConfigPool at CompileTime
 
 private:
+
+    explicit ECSIdRegistry() = default;  // Private constructor
+
     std::shared_ptr<IIdConfig> _currentIdConfig;
 	std::unordered_map<std::type_index, std::unique_ptr<IIdConfig>> _idConfigPool;
 	
