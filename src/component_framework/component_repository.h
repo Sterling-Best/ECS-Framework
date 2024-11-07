@@ -3,10 +3,13 @@
 #include <functional>
 #include <vector>
 #include <cstdint>
-#include "icomponent.h"
-#include "is_valid_entity_id_type.h"
 #include <any>
 #include <sstream> 
+
+#include "ankrel/unordered_dense.h" // Correct path to the external header file.
+
+#include "../id_framework/is_valid_entity_id_type.h"  // Adjust the path if id_framework is in a sibling directory.
+#include "icomponent.h"
 
 template<typename ComponentType, typename EntityIdType>
 class ComponentRepository {
@@ -134,6 +137,7 @@ public:
 private:
 
 	std::unordered_map<EntityIdType, ComponentType> _componentPool;
+	
 
 	// Helper struct to trigger static_assert for unsupported types
 	template<typename T> struct _always_false : std::false_type {};

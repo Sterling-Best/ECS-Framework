@@ -10,16 +10,16 @@ namespace ECSID {
 
 	template<typename idConfig>
 	void Initialize() {
-		_ecsIdManager = ECSIdMaanger();
+		_ecsIdManager = ECSIdManger();
 		_ecsIdManager.Initialize<idConfig>();
 	}
 
 	std::type_index GetEntityIdType() {
-		return _ecsIdManager;
+		return _ecsIdManger.GetEntityIdType();
 	}
 
 	std::type_index GetComponentIdType() {
-		return _componentIdType;
+		return _ecsIdManger.GetComponentIdType();
 	}
 
 	namespace {

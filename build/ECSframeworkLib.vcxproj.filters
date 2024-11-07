@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\component_framework\component_framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\component_framework\component_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\component_framework\component_manager_factory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\component_framework\component_manager_registry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\component_framework\component_manager_repository.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\component_framework\component_repository.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\component_framework\icomponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\component_framework\icomponent_factory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\entity_framework\entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\entity_framework\entity_factory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\entity_framework\entity_framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\entity_framework\entity_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\entity_framework\entity_repository.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\id_framework\ECSID.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\id_framework\ecs_id_manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\id_framework\ecs_id_registery.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\id_framework\iid_config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Sterling\source\repos\ECSframework\src\id_framework\is_valid_entity_id_type.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Sterling\source\repos\ECSframework\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{83F508F0-1AA8-364F-86D1-8599B7FCB069}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

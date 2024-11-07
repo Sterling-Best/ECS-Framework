@@ -1,0 +1,4 @@
+C:/Users/Sterling/source/repos/ECSframework/build/CMakeFiles/ECSframeworkLib.dir
+C:/Users/Sterling/source/repos/ECSframework/build/CMakeFiles/ECSframework.dir
+C:/Users/Sterling/source/repos/ECSframework/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Sterling/source/repos/ECSframework/build/CMakeFiles/ZERO_CHECK.dir

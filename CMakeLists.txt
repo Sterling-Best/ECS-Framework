@@ -19,54 +19,41 @@ set(ENTITY_FRAMEWORK_DIR "${SRC_DIR}/entity_framework")
 set(ID_FRAMEWORK_DIR "${SRC_DIR}/id_framework")
 set(MODULES_DIR "${SRC_DIR}/modules")
 
-include_directories(${CMAKE_SOURCE_DIR}/external)
-
-# Define the output header file paths
-set(GENERATED_IDCONFIG_HEADER "${CMAKE_BINARY_DIR}/collected_id_configs.h")
-set(GENERATED_COMPONENT_HEADER "${CMAKE_BINARY_DIR}/collected_components.h")
-set(GENERATED_FACTORY_HEADER "${CMAKE_BINARY_DIR}/collected_factories.h")
-
 # Collect all .cpp and .h files recursively from each relevant directory
 file(GLOB_RECURSE COMPONENT_SRC_FILES "${COMPONENT_FRAMEWORK_DIR}/*.cpp" "${COMPONENT_FRAMEWORK_DIR}/*.h")
 file(GLOB_RECURSE ENTITY_SRC_FILES "${ENTITY_FRAMEWORK_DIR}/*.cpp" "${ENTITY_FRAMEWORK_DIR}/*.h")
 file(GLOB_RECURSE ID_SRC_FILES "${ID_FRAMEWORK_DIR}/*.cpp" "${ID_FRAMEWORK_DIR}/*.h")
-file(GLOB_RECURSE MODULE_HEADERS "${MODULES_DIR}/*.h")
+file(GLOB_RECURSE MODULE_HEADERS "${MODULES_DIR}/*.cpp" "${MODULES_DIR}/*.h")
 
-# Write headers for each category
-file(WRITE ${GENERATED_IDCONFIG_HEADER} "// Automatically generated IdConfig header file\n")
-file(WRITE ${GENERATED_COMPONENT_HEADER} "// Automatically generated Component header file\n")
-file(WRITE ${GENERATED_FACTORY_HEADER} "// Automatically generated Factory header file\n")
-
-# Iterate through the collected headers and classify them
-foreach(header ${MODULE_HEADERS})
-    if(header MATCHES ".*IdConfig\\.h$")
-        file(APPEND ${GENERATED_IDCONFIG_HEADER} "#include \"${header}\"\n")
-    elseif(header MATCHES ".*ComponentFactory\\.h$")
-        # If the header contains both a component and a factory, add to both headers
-        file(APPEND ${GENERATED_COMPONENT_HEADER} "#include \"${header}\"\n")
-        file(APPEND ${GENERATED_FACTORY_HEADER} "#include \"${header}\"\n")
-    elseif(header MATCHES ".*Component\\.h$")
-        file(APPEND ${GENERATED_COMPONENT_HEADER} "#include \"${header}\"\n")
-    elseif(header MATCHES ".*Factory\\.h$")
-        file(APPEND ${GENERATED_FACTORY_HEADER} "#include \"${header}\"\n")
-    endif()
-endforeach()
 
 # Combine all source files
 set(SRC_FILES ${COMPONENT_SRC_FILES} ${ENTITY_SRC_FILES} ${ID_SRC_FILES})
 
 # Create a library from the ECS source files
 add_library(ECSframeworkLib STATIC ${SRC_FILES})
+# Add ankerl_unordered_dense as an interface library
 set_target_properties(ECSframeworkLib PROPERTIES LINKER_LANGUAGE CXX)
+
+message(STATUS "ankerl include path: ${CMAKE_SOURCE_DIR}/external/ankerl/unordered_dense_install/include")
+target_include_directories(ECSframeworkLib PRIVATE 
+    ${SRC_DIR}
+    ${CMAKE_SOURCE_DIR}/external/ankerl/unordered_dense_install/include
+)
 
 # Define the main executable using ECSframeworkLib
 add_executable(ECSframework "main.cpp")
 
-# Properly include generated headers and source directories
-target_include_directories(ECSframework PRIVATE ${CMAKE_BINARY_DIR} ${SRC_DIR} ${CMAKE_BINARY_DIR}/external)
+# Properly include generated headers, source directories, and external files for ECSframeworkLib
 
-  # Replace "src/main.cpp" with your actual main entry point
+target_include_directories(ECSframework PRIVATE 
+    ${SRC_DIR}
+)
+
+# Include the installed headers from ankerl::unordered_dense
+# Replace "src/main.cpp" with your actual main entry point
+# Link the interface library to your target
 target_link_libraries(ECSframework PRIVATE ECSframeworkLib)
+
 
 # Set C++ standard for the target
 if (CMAKE_VERSION VERSION_GREATER 3.12)
