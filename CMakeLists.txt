@@ -19,6 +19,8 @@ set(ENTITY_FRAMEWORK_DIR "${SRC_DIR}/entity_framework")
 set(ID_FRAMEWORK_DIR "${SRC_DIR}/id_framework")
 set(MODULES_DIR "${SRC_DIR}/modules")
 
+include_directories(${CMAKE_SOURCE_DIR}/external)
+
 # Define the output header file paths
 set(GENERATED_IDCONFIG_HEADER "${CMAKE_BINARY_DIR}/collected_id_configs.h")
 set(GENERATED_COMPONENT_HEADER "${CMAKE_BINARY_DIR}/collected_components.h")
@@ -61,7 +63,7 @@ set_target_properties(ECSframeworkLib PROPERTIES LINKER_LANGUAGE CXX)
 add_executable(ECSframework "main.cpp")
 
 # Properly include generated headers and source directories
-target_include_directories(ECSframework PRIVATE ${CMAKE_BINARY_DIR} ${SRC_DIR})
+target_include_directories(ECSframework PRIVATE ${CMAKE_BINARY_DIR} ${SRC_DIR} ${CMAKE_BINARY_DIR}/external)
 
   # Replace "src/main.cpp" with your actual main entry point
 target_link_libraries(ECSframework PRIVATE ECSframeworkLib)
