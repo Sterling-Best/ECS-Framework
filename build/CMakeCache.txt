@@ -194,6 +194,9 @@ ECSframework_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 ECSframework_SOURCE_DIR:STATIC=C:/Users/Sterling/source/repos/ECSframework
 
+//The directory containing a CMake configuration file for unordered_dense.
+unordered_dense_DIR:PATH=C:/Users/Sterling/source/repos/ECSframework/external/ankerl/unordered_dense_install/lib/cmake/unordered_dense
+
 
 ########################
 # INTERNAL cache entries

@@ -1,3 +1,6 @@
+#include "ankerl/unordered_dense.h"
+
+#include <iostream>
 #include <unordered_map>
 #include <stdexcept>
 #include <functional>
@@ -6,21 +9,22 @@
 #include <any>
 #include <sstream> 
 
-#include "ankrel/unordered_dense.h" // Correct path to the external header file.
 
 #include "../id_framework/is_valid_entity_id_type.h"  // Adjust the path if id_framework is in a sibling directory.
 #include "icomponent.h"
 
-template<typename ComponentType, typename EntityIdType>
+template<typename EntityIdType, typename ComponentType>
 class ComponentRepository {
 	//Static Assert to Ensure that instantiating a ComponentRepository is associated with an ICOmponent ex. ComponentRepostiory<ComponentType>()
 	static_assert(std::is_base_of<IComponent, ComponentType>::value, 
 		"ComponentType must derive from IComponent");
+
 	// Static Assert to restrict EntityIdType to valid types
 	static_assert(IsValidEntityIdType<EntityIdType>::value, 
 		"EntityIdType must be a valid type (arithmetic, char, string, or supported type) from IsValidEntityIdType.");
 
 public:
+	
 
 	ComponentRepository() {
 	}
@@ -136,12 +140,10 @@ public:
 	
 private:
 
-	std::unordered_map<EntityIdType, ComponentType> _componentPool;
+	ankerl::unordered_dense::map<EntityIdType, ComponentType> _componentPool;
 	
-
 	// Helper struct to trigger static_assert for unsupported types
 	template<typename T> struct _always_false : std::false_type {};
-
 	void _CheckForEntityID(const auto componentIterator) {
 		if (componentIterator == this->_componentPool.end()) {
 			std::ostringstream oss;

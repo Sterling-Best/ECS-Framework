@@ -1,5 +1,5 @@
 #include<cstdint> // for unint32_t
-#include "icomponent.h" //Include IComponent struct defintion
+#include "../component_framework/icomponent.h" //Include IComponent struct defintion
 
 struct TransformComponent: public IComponent {
 	double x, y, z;

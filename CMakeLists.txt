@@ -19,46 +19,70 @@ set(ENTITY_FRAMEWORK_DIR "${SRC_DIR}/entity_framework")
 set(ID_FRAMEWORK_DIR "${SRC_DIR}/id_framework")
 set(MODULES_DIR "${SRC_DIR}/modules")
 
-# Collect all .cpp and .h files recursively from each relevant directory
-file(GLOB_RECURSE COMPONENT_SRC_FILES "${COMPONENT_FRAMEWORK_DIR}/*.cpp" "${COMPONENT_FRAMEWORK_DIR}/*.h")
-file(GLOB_RECURSE ENTITY_SRC_FILES "${ENTITY_FRAMEWORK_DIR}/*.cpp" "${ENTITY_FRAMEWORK_DIR}/*.h")
-file(GLOB_RECURSE ID_SRC_FILES "${ID_FRAMEWORK_DIR}/*.cpp" "${ID_FRAMEWORK_DIR}/*.h")
-file(GLOB_RECURSE MODULE_HEADERS "${MODULES_DIR}/*.cpp" "${MODULES_DIR}/*.h")
+# Include path for ankerl::unordered_dense
+set(ANKERL_UNORDERED_DENSE_PATH "${CMAKE_SOURCE_DIR}/external/ankerl/unordered_dense_install")
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${ANKERL_UNORDERED_DENSE_PATH}/include")
+# Add this directory to the prefix path in case we need to find it
+list(APPEND CMAKE_PREFIX_PATH "${ANKERL_UNORDERED_DENSE_PATH}/lib/cmake/unordered_dense")
 
+# Collect all .cpp and .h files recursively from each relevant directory
+file(GLOB_RECURSE COMPONENT_SRC_FILES "${COMPONENT_FRAMEWORK_DIR}/*.cpp")
+file(GLOB_RECURSE ENTITY_SRC_FILES "${ENTITY_FRAMEWORK_DIR}/*.cpp")
+file(GLOB_RECURSE ID_SRC_FILES "${ID_FRAMEWORK_DIR}/*.cpp")
+file(GLOB_RECURSE MODULE_SRC_FILES "${MODULES_DIR}/*.cpp" )
+
+message(STATUS "Component Source Files: ${COMPONENT_SRC_FILES}")
+message(STATUS "Entity Source Files: ${ENTITY_SRC_FILES}")
+message(STATUS "ID Source Files: ${ID_SRC_FILES}")
 
 # Combine all source files
-set(SRC_FILES ${COMPONENT_SRC_FILES} ${ENTITY_SRC_FILES} ${ID_SRC_FILES})
+set(SRC_FILES ${COMPONENT_SRC_FILES} ${ENTITY_SRC_FILES} ${ID_SRC_FILES} ${MODULE_SRC_FILES})
 
-# Create a library from the ECS source files
-add_library(ECSframeworkLib STATIC ${SRC_FILES})
-# Add ankerl_unordered_dense as an interface library
+# Create a static library from the ECS source files
+add_library(ECSframeworkLib STATIC dummy.cpp)
+
+# Set output directory for the library
 set_target_properties(ECSframeworkLib PROPERTIES LINKER_LANGUAGE CXX)
 
+find_package(unordered_dense CONFIG REQUIRED)
+target_link_libraries(ECSframeworkLib unordered_dense::unordered_dense)
+
 message(STATUS "ankerl include path: ${CMAKE_SOURCE_DIR}/external/ankerl/unordered_dense_install/include")
+
+# Include directories for the ECSframeworkLib library
 target_include_directories(ECSframeworkLib PRIVATE 
     ${SRC_DIR}
-    ${CMAKE_SOURCE_DIR}/external/ankerl/unordered_dense_install/include
+    ${CMAKE_SOURCE_DIR}/external/ankerl/unordered_dense_install/include   # Add include directory for unordered_dense.h
 )
+
 
 # Define the main executable using ECSframeworkLib
 add_executable(ECSframework "main.cpp")
 
-# Properly include generated headers, source directories, and external files for ECSframeworkLib
-
-target_include_directories(ECSframework PRIVATE 
-    ${SRC_DIR}
+# Set output directory for the executable
+set_target_properties(ECSframework PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 
-# Include the installed headers from ankerl::unordered_dense
-# Replace "src/main.cpp" with your actual main entry point
-# Link the interface library to your target
-target_link_libraries(ECSframework PRIVATE ECSframeworkLib)
+# Include directories for the executable
+target_include_directories(ECSframework PRIVATE 
+    ${SRC_DIR}
+    ${CMAKE_SOURCE_DIR}/external/ankerl/unordered_dense_install/include   # Add include directory for unordered_dense.h
+)
 
+#find_package(ankerl::unordered_dense CONFIG REQUIRED)
+#target_link_libraries(ECSframeworkLib unordered_dense::unordered_dense)
+
+# Link ECSframeworkLib to ECSframework
+target_link_libraries(ECSframework PRIVATE ECSframeworkLib)
 
 # Set C++ standard for the target
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET ECSframework PROPERTY CXX_STANDARD 23)
 endif()
+
+# Add dependency to ensure ECSframeworkLib builds before ECSframework
+add_dependencies(ECSframework ECSframeworkLib)
 
 # Include FetchContent module for Google Test
 #include(FetchContent)

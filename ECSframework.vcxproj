@@ -97,6 +97,7 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;ECSFRAMEWORK_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>\Users\Sterling\source\repos\ECSframework\external\ankerl\unordered_dense_install\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
