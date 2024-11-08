@@ -8,6 +8,8 @@
 #include <cstdint>
 #include <any>
 #include <sstream> 
+#include <memory_resource>
+#include <optional>
 
 
 #include "../id_framework/is_valid_entity_id_type.h"  // Adjust the path if id_framework is in a sibling directory.
@@ -24,18 +26,31 @@ class ComponentRepository {
 		"EntityIdType must be a valid type (arithmetic, char, string, or supported type) from IsValidEntityIdType.");
 
 public:
-	
 
-	ComponentRepository() {
+	ComponentRepository(std::pmr::memory_resource* resource = std::pmr::get_default_resource())
+		: _buffer(resource) {
+		_componentPool = ankerl::unordered_dense::map<EntityIdType, ComponentType, ankerl::unordered_dense::hash<EntityIdType>>();
+		_componentPool.max_load_factor(0.9f);
 	}
 	
-	//Adds a component of the repository
-	void AddComponent(const ComponentType& component) {
-		const EntityIdType& entityID = component.entityID;  // Assume ComponentType has GetEntityID() or entityID member
-		auto componentIterator = this->_componentPool.find(entityID);
-		_CheckNoEntityID(componentIterator);  // Ensure that the entityID doesn't already exist in the pool
-		this->_componentPool.emplace(entityID, std::move(component));  // Add the component to the pool
+	// Default constructor
+	/*ComponentRepository() {
+		_componentPool.max_load_factor(0.9f);
+	}*/
+	
+	////Adds a component of the repository
+	inline ComponentType* AddComponent(ComponentType&& component) {
+		const EntityIdType entityID = component.entityID;
+		auto [iterator, inserted] = _componentPool.try_emplace(entityID, std::forward<ComponentType>(component));
+		return inserted ? &iterator->second : nullptr;
 	}
+
+	/*inline ComponentType* AddComponent(ComponentType&& component) {
+		const EntityIdType entityID = component.entityID;
+		auto [iterator, inserted] = _componentPool.emplace(entityID, std::move(component));
+		return inserted ? &iterator->second : nullptr;
+	}*/
+
 
 	// Generic method that accepts any container type (e.g., vector, map, etc.)
 	template<typename InputIterator>
@@ -93,12 +108,13 @@ public:
 		_CheckForEntityID(componentIterator);
 		Method(componentIterator->second, args);
 	}
-	
-	void IterateAllComponentsMethod(std::function<void(ComponentType&, const std::vector<std::any>&)> Method, const std::vector<std::any>& args) {
+
+	template <typename Func, typename... Args>
+	void IterateAllComponentsMethod(Func* method, Args&&... args) {
 		// Range-based for loop to iterate over all components in _componentPool
 		for (auto& [entityID, component] : _componentPool) {
-			// Apply the given method to each component, passing in the args
-			Method(component, args);
+			// Call the method pointer with the component and forward additional args
+			(*method)(&component, std::forward<Args>(args)...);
 		}
 	}
 
@@ -139,27 +155,40 @@ public:
 	}
 	
 private:
-
-	ankerl::unordered_dense::map<EntityIdType, ComponentType> _componentPool;
 	
+
+	//using EntityIdHash = std::conditional_t<
+	//	std::is_arithmetic<EntityIdType>::value ||
+	//	std::is_same_v<EntityIdType, std::string> ||
+	//	std::is_same_v<EntityIdType, std::wstring> ||
+	//	std::is_enum<EntityIdType>::value,
+	//	ankerl::unordered_dense::hash<EntityIdType>,
+	//	std::hash<EntityIdType>>;
+
+	//using EntityAllocator = std::conditional_t<
+	//	std::is_arithmetic<EntityIdType>::value ||
+	//	std::is_same_v<EntityIdType, std::string> ||
+	//	std::is_same_v<EntityIdType, std::wstring>,
+	//	std::pmr::polymorphic_allocator<std::pair<EntityIdType, ComponentType>>,
+	//	std::allocator<std::pair<EntityIdType, ComponentType>>>;
+
+	//ankerl::unordered_dense::map<EntityIdType, ComponentType> _componentPool;
+	
+	std::pmr::monotonic_buffer_resource _buffer;
+	ankerl::unordered_dense::map<EntityIdType, ComponentType, ankerl::unordered_dense::hash<EntityIdType>> _componentPool;
+
 	// Helper struct to trigger static_assert for unsupported types
 	template<typename T> struct _always_false : std::false_type {};
-	void _CheckForEntityID(const auto componentIterator) {
+	void _CheckForEntityID(const auto& componentIterator) {
 		if (componentIterator == this->_componentPool.end()) {
-			std::ostringstream oss;
-			oss << componentIterator->first; // Properly use entityID.
-			throw std::runtime_error("Component with Entity ID (" + oss.str() + ") not found.");
+			throw std::runtime_error("Component with specified Entity ID not found.");
 		}
 	}
 
 	void _CheckNoEntityID(const auto componentIterator) {
 		if (componentIterator != this->_componentPool.end()) {
-			std::ostringstream oss;
-			oss << componentIterator->first; // Properly use the entityID.
-			throw std::runtime_error("Component with the same entity ID (" + oss.str() + ") already exists.");
+			throw std::runtime_error("Component with the same entity ID already exists.");
 		}
 	}
-
-
 
 };                             
