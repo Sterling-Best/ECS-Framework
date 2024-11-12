@@ -4,6 +4,9 @@
 struct TransformComponent: public IComponent {
 	double x, y, z;
 
-	TransformComponent(uint32_t targetComponentID, uint32_t targetEntityID, double xPosition, double yPosition, double zPosition)
-		: IComponent(targetComponentID, targetEntityID), x(xPosition), y(yPosition), z(zPosition) {}
+    // Default constructor
+    TransformComponent() : IComponent(0, 0), x(0.0), y(0.0), z(0.0) {}
+
+    TransformComponent(uint32_t targetComponentID, uint32_t targetEntityID, double xPosition, double yPosition, double zPosition)
+        : IComponent(targetComponentID, targetEntityID), x(xPosition), y(yPosition), z(zPosition) {}
 };

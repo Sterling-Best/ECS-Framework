@@ -1,3 +1,5 @@
+#pragma once
+
 #include "ankerl/unordered_dense.h"
 
 #include <iostream>
@@ -10,27 +12,45 @@
 #include <sstream> 
 #include <memory_resource>
 #include <optional>
+#include <string>
+#include <tuple>
+#include <type_traits>
 
-
-#include "../id_framework/is_valid_entity_id_type.h"  // Adjust the path if id_framework is in a sibling directory.
+//#include "../id_framework/is_valid_entity_id_type.h"  // Adjust the path if id_framework is in a sibling directory.
 #include "icomponent.h"
+#include "../utilities/custom_hash.h"
 
-template<typename EntityIdType, typename ComponentType>
+#ifdef _MSC_VER
+#define FORCE_INLINE __forceinline
+#else
+#define FORCE_INLINE inline __attribute__((always_inline))
+#endif
+
+template<typename ComponentType>
 class ComponentRepository {
+
+	using EntityIdType = uint64_t;
+
 	//Static Assert to Ensure that instantiating a ComponentRepository is associated with an ICOmponent ex. ComponentRepostiory<ComponentType>()
 	static_assert(std::is_base_of<IComponent, ComponentType>::value, 
 		"ComponentType must derive from IComponent");
 
-	// Static Assert to restrict EntityIdType to valid types
-	static_assert(IsValidEntityIdType<EntityIdType>::value, 
-		"EntityIdType must be a valid type (arithmetic, char, string, or supported type) from IsValidEntityIdType.");
+	using EntityIdHash = CustomHash<EntityIdType>;
+
 
 public:
 
+
+
+	/*ankerl::unordered_dense::map<EntityIdType, ComponentType, ankerl::unordered_dense::hash<EntityIdType>> _componentPool;*/
+	
+	/*std::unordered_map<EntityIdType, ComponentType> _componentPool;*/
+
 	ComponentRepository(std::pmr::memory_resource* resource = std::pmr::get_default_resource())
-		: _buffer(resource) {
-		_componentPool = ankerl::unordered_dense::map<EntityIdType, ComponentType, ankerl::unordered_dense::hash<EntityIdType>>();
-		_componentPool.max_load_factor(0.9f);
+		: _buffer(resource)
+		//_componentPool(0, EntityIdHash(), std::equal_to<EntityIdType>()) 
+		{
+		_componentPool.max_load_factor(0.5f);
 	}
 	
 	// Default constructor
@@ -38,18 +58,12 @@ public:
 		_componentPool.max_load_factor(0.9f);
 	}*/
 	
-	////Adds a component of the repository
-	inline ComponentType* AddComponent(ComponentType&& component) {
+	//////Adds a component of the repository
+	inline ComponentType* AddComponent(ComponentType component) {
 		const EntityIdType entityID = component.entityID;
-		auto [iterator, inserted] = _componentPool.try_emplace(entityID, std::forward<ComponentType>(component));
+		auto [iterator, inserted] = _componentPool.try_emplace(entityID, std::move(component));
 		return inserted ? &iterator->second : nullptr;
 	}
-
-	/*inline ComponentType* AddComponent(ComponentType&& component) {
-		const EntityIdType entityID = component.entityID;
-		auto [iterator, inserted] = _componentPool.emplace(entityID, std::move(component));
-		return inserted ? &iterator->second : nullptr;
-	}*/
 
 
 	// Generic method that accepts any container type (e.g., vector, map, etc.)
@@ -97,16 +111,37 @@ public:
 		}
 	}
 
-	ComponentType GetComponent(const EntityIdType& entityID) {
-		auto componentIterator = this->_componentPool.find(entityID);
-		_CheckForEntityID(componentIterator);
-		return componentIterator->second;
+	// Use the macro in your function
+	FORCE_INLINE ComponentType* GetComponent(const EntityIdType& entityID) noexcept {
+		auto componentIterator = _componentPool.find(entityID);
+		return componentIterator != _componentPool.end() ? &componentIterator->second : nullptr;
 	}
 
-	void IterateComponentMethod(std::function<void(ComponentType&, const std::vector<std::any>&)> Method, const EntityIdType& entityID, const std::vector<std::any>& args) {
-		auto componentIterator = this->_componentPool.find(entityID);
-		_CheckForEntityID(componentIterator);
-		Method(componentIterator->second, args);
+	FORCE_INLINE ComponentType* GetComponentOrThrow(const EntityIdType& entityID) {
+		auto componentIterator = _componentPool.find(entityID);
+		if (componentIterator == _componentPool.end()) {
+			// Create an error message with the missing entity ID
+			std::ostringstream errorMsg;
+			errorMsg << "Component with Entity ID " << entityID << " not found.";
+			throw std::out_of_range(errorMsg.str());
+		}
+		return &componentIterator->second;
+	}
+
+	template <typename Func, typename... Args>
+	FORCE_INLINE void IterateComponentMethod(Func* method, const EntityIdType& entityID, Args&&... args) noexcept {
+		auto componentIterator = _componentPool.find(entityID);
+
+		//// Use assert in debug mode to catch missing entityID cases during development
+		//assert((componentIterator != _componentPool.end()) && "Entity ID not found");
+
+		//// Early return in production if entityID is not found, avoiding exception overhead
+		//if (componentIterator == _componentPool.end()) {
+		//    return;
+		//}
+
+		// Call the method using std::invoke and passing the address of the component (assuming it expects a pointer)
+		(*method)(&(componentIterator->second), args ...);
 	}
 
 	template <typename Func, typename... Args>
@@ -114,7 +149,7 @@ public:
 		// Range-based for loop to iterate over all components in _componentPool
 		for (auto& [entityID, component] : _componentPool) {
 			// Call the method pointer with the component and forward additional args
-			(*method)(&component, std::forward<Args>(args)...);
+			(*method)(&component, args ...);
 		}
 	}
 
@@ -172,10 +207,9 @@ private:
 	//	std::pmr::polymorphic_allocator<std::pair<EntityIdType, ComponentType>>,
 	//	std::allocator<std::pair<EntityIdType, ComponentType>>>;
 
-	//ankerl::unordered_dense::map<EntityIdType, ComponentType> _componentPool;
-	
 	std::pmr::monotonic_buffer_resource _buffer;
-	ankerl::unordered_dense::map<EntityIdType, ComponentType, ankerl::unordered_dense::hash<EntityIdType>> _componentPool;
+	ankerl::unordered_dense::map<EntityIdType, ComponentType, EntityIdHash, std::equal_to<EntityIdType>> _componentPool;
+	//ankerl::unordered_dense::map<EntityIdType, ComponentType, EntityIdHash, std::equal_to<EntityIdType>> _componentPool;
 
 	// Helper struct to trigger static_assert for unsupported types
 	template<typename T> struct _always_false : std::false_type {};
@@ -191,4 +225,4 @@ private:
 		}
 	}
 
-};                             
+};

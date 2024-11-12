@@ -15,7 +15,7 @@ namespace ECSID {
 	}
 
 	std::type_index GetEntityIdType() {
-		return _ecsIdManger.GetEntityIdType();
+		return typeid(_ecsIdManger.GetEntityIdType());
 	}
 
 	std::type_index GetComponentIdType() {

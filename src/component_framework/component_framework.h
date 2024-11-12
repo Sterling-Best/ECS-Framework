@@ -1,13 +1,20 @@
-#include "component_manager_registry.h"
+#include "component_manager_registery.h"
 
 class ComponentFramework {
 
 public:
 
 	ComponentFramework() 
-		: _componentMangerRegistery(ComponentManagerRegistry()) {}
+		: _componentManagerRegistery(ComponentManagerRegistery()) {}
+ 
+	
+	template<typename ComponentType>
+	IComponentManager GetManager() { 
+		return _componentManagerRegistery.GetComponentManager<ComponentType>(); 
+	}
 
 private:
 
-	ComponentManagerRegistry _componentManagerRegistry;
+	ComponentManagerRegistery _componentManagerRegistery;
+	//TODO: Add ComponentFactoryRegistery
 };

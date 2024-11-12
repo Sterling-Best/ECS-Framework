@@ -39,7 +39,7 @@ message(STATUS "ID Source Files: ${ID_SRC_FILES}")
 set(SRC_FILES ${COMPONENT_SRC_FILES} ${ENTITY_SRC_FILES} ${ID_SRC_FILES} ${MODULE_SRC_FILES})
 
 # Create a static library from the ECS source files
-add_library(ECSframeworkLib STATIC dummy.cpp)
+add_library(ECSframeworkLib STATIC dummy.cpp "src/utilities/custom_hash.h")
 
 # Set output directory for the library
 set_target_properties(ECSframeworkLib PROPERTIES LINKER_LANGUAGE CXX)
@@ -57,7 +57,7 @@ target_include_directories(ECSframeworkLib PRIVATE
 
 
 # Define the main executable using ECSframeworkLib
-add_executable(ECSframework "main.cpp")
+add_executable(ECSframework "main.cpp" "src/utilities/custom_hash.h")
 
 # Set output directory for the executable
 set_target_properties(ECSframework PROPERTIES
