@@ -52,6 +52,8 @@ public:
 		{
 		_componentPool.max_load_factor(0.5f);
 	}
+
+	// TODO: Deconstroctor
 	
 	// Default constructor
 	/*ComponentRepository() {
@@ -88,9 +90,7 @@ public:
 		}
 	}
 
-	void RemoveComponent(const EntityIdType& entityID) {
-		this->_componentPool.erase(entityID);
-	}
+	
 
 	//Generic Method that accepts any container type containing the current EntityIdType
 	template<typename InputIterator>
@@ -122,7 +122,7 @@ public:
 		if (componentIterator == _componentPool.end()) {
 			// Create an error message with the missing entity ID
 			std::ostringstream errorMsg;
-			errorMsg << "Component with Entity ID " << entityID << " not found.";
+			errorMsg << "Component with Entity ID [ " << entityID << " ] not found.";
 			throw std::out_of_range(errorMsg.str());
 		}
 		return &componentIterator->second;
@@ -188,6 +188,12 @@ public:
 	void Clear() noexcept {
 		this->_componentPool.clear();
 	}
+
+	// TODO: Capacity()
+	// TODO: LoadFactor()
+	// TODO: MemoryUsage()
+	// TODO: Save() - JSON
+	// TODO: Load() - From JSON
 	
 private:
 	

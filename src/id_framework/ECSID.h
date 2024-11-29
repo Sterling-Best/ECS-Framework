@@ -8,18 +8,27 @@
 
 namespace ECSID {
 
+	// TODO: Properly configure this with IdConfig
+	using EntityIdType = uint64_t;
+	using ComponentIdType = uint64_t;
+
 	template<typename idConfig>
 	void Initialize() {
 		_ecsIdManager = ECSIdManger();
 		_ecsIdManager.Initialize<idConfig>();
 	}
 
+	// TODO: Properly configure this with IdConfig
 	std::type_index GetEntityIdType() {
-		return typeid(_ecsIdManger.GetEntityIdType());
+		
+		return typeid(EntityIdType);
+		//return typeid(_ecsIdManger.GetEntityIdType());
 	}
 
-	std::type_index GetComponentIdType() {
-		return _ecsIdManger.GetComponentIdType();
+	// TODO: Properly configure this with IdConfig
+	std::type_index GetComponentIdType() { 
+		return typeid(ComponentIdType);
+		//return _ecsIdManger.GetComponentIdType();
 	}
 
 	namespace {
