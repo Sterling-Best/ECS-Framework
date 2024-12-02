@@ -12,16 +12,18 @@ namespace ECSID {
 	using EntityIdType = uint64_t;
 	using ComponentIdType = uint64_t;
 
+	EntityIdType _counter = 0;
+
 	template<typename idConfig>
 	void Initialize() {
 		_ecsIdManager = ECSIdManger();
-		_ecsIdManager.Initialize<idConfig>();
+		//_ecsIdManager.Initialize<idConfig>();
 	}
 
 	// TODO: Properly configure this with IdConfig
 	std::type_index GetEntityIdType() {
 		
-		return typeid(EntityIdType);
+		return _ecsIdManager.GetEntityIdType();
 		//return typeid(_ecsIdManger.GetEntityIdType());
 	}
 
@@ -31,9 +33,15 @@ namespace ECSID {
 		//return _ecsIdManger.GetComponentIdType();
 	}
 
-	namespace {
-		ECSIdMaanger _ecsIdManger;
+	EntityIdType NextEntityId() {
+		return ++_counter;
 	}
+
+	EntityIdType NextComponentId() {
+		return ++_counter;
+	}
+
+	ECSIdMaanger _ecsIdManager =  ECSIdManger();
 
 };
 

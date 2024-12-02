@@ -1,142 +1,126 @@
-#include "ankerl/unordered_dense.h"
-#include "entity.h"
+/**
+ * @class EntityRepository
+ * @brief Singleton repository for managing entities in the ECS framework.
+ *
+ * The EntityRepository provides centralized storage and management of entities.
+ * It allows adding, removing, querying, and iterating over entities. The repository
+ * ensures entities are uniquely identified by their Entity ID and provides methods
+ * for serialization and deserialization for persistence.
+ *
+ * @details
+ * This repository is implemented as a singleton to ensure global access and consistency.
+ * It internally uses an `ankerl::unordered_dense::map` to store entitiesin contiguous memory 
+ * for fast access and operations . Entities can be added, removed, or queried based on custom
+ * predicates or their IDs. The repository also provides utilities for managing the
+ * memory usage and load factor of the internal storage.
+ *
+ * @note This class is thread-unsafe. If multi-threaded access is required,
+ *       synchronization mechanisms must be implemented externally.
+ *
+ * @author Sterling Best
+ * @date 2024-12-02
+ */
 
-#include <ECSID.h>
+#pragma once
+#ifndef ENTITY_REPOSITORY_H
+#define ENTITY_REPOSITORY_H
+
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include "ankerl/unordered_dense.h"
+#include "../id_framework/ECSID.h"
+#include "entity.h"
+#include "entity_serializer.h"
+
+
+// TODO: Make the class thread safe
 
 
 class EntityRepository {
 
-	using EntityIdType = ECSID::GetEntityIdType(); // Default uint64_t
+	using EntityIdType = ECSID::EntityIdType;
 
 public:
 
-	EntityRepository() {
+	/* Public method to access the singleton instance
+		Deleted copy and move constructors/operators */
+	static EntityRepository& getInstance();
+	EntityRepository(const EntityRepository&) = delete;
+	EntityRepository(EntityRepository&&) = delete;
+	EntityRepository& operator=(const EntityRepository&) = delete;
+	EntityRepository& operator=(EntityRepository&&) = delete;
 
-	}
+	Entity* AddEntity(Entity&& entity);
 
-	~EntityRepository() {
-		this->Clear();
-	}
-
-	Entity* AddEntity(Entity&& entity) {
-		const EntityIdType entityID = entity.entityID;
-		auto [iterator, inserted] = _entityPool.try_emplace(entityID, std::move(entity));
-		return inserted ? &iterator->second : nullptr;
-	}
-
-	void AddEntities(std::vector<Entity>&& entities) {
-		for (auto& entity : entities) {
-			AddEntity(std::move(entity));
-		}
-	}
-	
-	void RemoveEntity(const EntityIdType& entityID) {
-		this->_entityPool.erase(entityID);
-	}
-
-	void RemoveEntities(const std::vector<EntityIdType>& entityIDs) {
-		for (const auto& entityID : entityIDs) {
-			RemoveEntity(entityID);
-		}
-	}
+	void AddEntities(std::vector<Entity>&& entities);
 
 	template <typename Predicate>
-	auto FindEntities(Predicate predicate) const {
-		return std::views::filter(_entityPool, [predicate](const auto& pair) {
-			return predicate(pair.second);
-			});
-	}
-	
-	const Entity* GetEntity(const EntityIdType& entityID) const noexcept {
-		auto componentIterator = _entityPool.find(entityID);
-		return componentIterator != _entityPool.end() ? &componentIterator->second : nullptr;
-	}
+	auto FindEntities(Predicate predicate) const;
 
-	const ComponentType* GetEntityOrThrow(const EntityIdType& entityID) {
-		auto entityIterator = _entityPool.find(entityID);
-		if (entityIterator == _entityPool.end()) {
-			// Create an error message with the missing entity ID
-			std::ostringstream errorMsg;
-			errorMsg << "Entity with Entity ID [ " << entityID << " ] not found.";
-			throw std::out_of_range(errorMsg.str());
-		}
-		return &entityIterator->second;
-	}
+	const Entity* GetEntity(const EntityIdType& entityID) const noexcept;
 
-	bool SetEntity(const EntityIdType& entityID, Entity&& newEntity) {
-		auto it = _entityPool.find(entityID);
-		if (it != _entityPool.end()) {
-			it->second = std::move(newEntity);
-			return true;
-		}
-		return false;
-	}
+	const Entity* GetEntityOrThrow(const EntityIdType& entityID);
 
 	template <typename Func, typename... Args>
-	void IterateEntityMethod(const EntityIdType& entityID, Func* method, Args&&... args) noexcept {
-		auto entityIterator = _entityPool.find(entityID);
-		if (entityIterator != _entityPool.end()) {
-			(*method)(&(entityIterator->second), std::forward<Args>(args)...);
-		}
-	}
+	void IterateEntityMethod(const EntityIdType& entityID, Func* method, Args&&... args) noexcept;
+	
+	void RemoveEntity(const EntityIdType& entityID);
+
+	void RemoveEntities(const std::vector<EntityIdType>& entityIDs);
+
+	bool SetEntity(const EntityIdType& entityID, Entity&& newEntity);
+
+	// TODO: Switch serialization to json
+	void Load(std::istream& in);
+	
+	void Save(std::ostream& out) const;
 
 	//Pool Utilities/Configuration
 
-	void ReserveSize(std::size_t size) {
-		if (size > _entityPool.capacity()) {
-			_entityPool.rehash(size);
-		}
-	}
+	auto cbegin() const noexcept;
+
+	auto cend() const noexcept;
 	
-	void Clear() noexcept {
-		this->_entityPool.clear();
-	}
-
-	// TODO: Switch serialization to json
+	auto begin() noexcept;
 	
-	void Save(std::ostream& out) const {
-		for (const auto& [entityID, entity] : _entityPool) {
-			out << entityID << " " << entity.Serialize() << "\n";
-		}
-	}
+	auto end() noexcept;
 
-	void Load(std::istream& in) {
-		Entity entity;
-		EntityIdType entityID;
-		while (in >> entityID >> entity) {
-			AddEntity(std::move(entity));
-		}
-	}
+	void Clear() noexcept;
 
-	//Pool Info/Diagnosis
+	const std::size_t Count() const noexcept;
 
-	auto cbegin() const noexcept { return _entityPool.cbegin(); }
-	auto cend() const noexcept { return _entityPool.cend(); }
-	auto begin() noexcept { return _entityPool.begin(); }
-	auto end() noexcept { return _entityPool.end(); }
+	float LoadFactor() const noexcept;
 
-	const std::size_t Count() const noexcept {
-		return this->_entityPool.size();
-	}
+	double AverageLoadFactor() const noexcept;
 
-	std::size_t Capacity() const noexcept {
-		return _entityPool.capacity();
-	}
+	constexpr std::size_t MemoryUsage() const noexcept;
 
-	float LoadFactor() const noexcept {
-		return _entityPool.load_factor();
-	}
-
-	double AverageLoadFactor() const noexcept {
-		return _entityPool.load_factor() / _entityPool.max_load_factor();
-	}
-
-	constexpr std::size_t MemoryUsage() const noexcept {
-		return _entityPool.size() * sizeof(std::pair<EntityIdType, Entity>);
-	}
+	void ReserveSize(std::size_t size); //TODO: Add Capacity
 
 private:
+
+	EntityRepository();
+
+	~EntityRepository();
 
 	ankerl::unordered_dense::map<EntityIdType, Entity> _entityPool;
 
 };
+
+template <typename Predicate>
+auto EntityRepository::FindEntities(Predicate predicate) const {
+	return std::views::filter(_entityPool, [predicate](const auto& pair) {
+		return predicate(pair.second);
+		});
+}
+
+template <typename Func, typename... Args>
+void EntityRepository::IterateEntityMethod(const EntityIdType& entityID, Func* method, Args&&... args) noexcept {
+	auto entityIterator = _entityPool.find(entityID);
+	if (entityIterator != _entityPool.end()) {
+		(*method)(&(entityIterator->second), std::forward<Args>(args)...);
+	}
+}
+
+#endif //ENTITY_REPOSITORY_H
